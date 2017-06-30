@@ -704,6 +704,48 @@ void RandomOrderChannels(const cv::Mat& in_img, cv::Mat* out_img,
   }
 }
 
+void BarrelPincussionDistortion(const cv::Mat& in_img, cv::Mat* out_img,
+                                double Cxf, double Cyf, double kx, double ky) {
+  // Cx, Cy: coordinates of center of transformation (in proportion to
+  // image size: 0.5, 0.5 means center
+  // kx, ky : parameter for deformation along both axes
+  //  < 0 means barrel : enlargissement of pixels is greater near center
+  //  > 0 means pincushion : enlargissement of pixels is greater far
+  // from center of distortion
+  cv::Mat  mapx( in_img.rows, in_img.cols, CV_32FC1);
+  cv::Mat  mapy( in_img.rows, in_img.cols, CV_32FC1);
+  // int w= in_img.cols;
+  //int h= in_img.rows;
+  
+  float Cx = Cxf*in_img.cols;
+  float Cy = Cyf*in_img.rows;
+  
+
+  float* pbuf = (float*)mapx.ptr();
+  for (int y = 0; y < in_img.rows; y++)    
+    for (int x = 0; x < in_img.cols; x++)
+    {
+      float u  = Cx+(x-Cx)*(1+kx*((x-Cx)*(x-Cx)+(y-Cy)*(y-Cy)));
+      *pbuf = u;
+      ++pbuf;      
+    }
+  
+  
+  pbuf = (float*)mapy.ptr();
+  for (int y = 0;y < in_img.rows; y++)  
+    for (int x = 0; x < in_img.cols; x++) 
+    {
+      float u  = Cy+(y-Cy)*(1+ky*((x-Cx)*(x-Cx)+(y-Cy)*(y-Cy)));
+      *pbuf = u;
+      ++pbuf;
+    }
+  out_img = new cv::Mat(in_img.rows, in_img.cols, in_img.type());
+  cv::remap(in_img, *out_img, mapx, mapy, CV_INTER_CUBIC); 
+
+}
+  
+
+  
 cv::Mat ApplyDistort(const cv::Mat& in_img, const DistortionParameter& param) {
   cv::Mat out_img = in_img;
   float prob;
@@ -769,3 +811,4 @@ cv::Mat ApplyDistort(const cv::Mat& in_img, const DistortionParameter& param) {
 #endif  // USE_OPENCV
 
 }  // namespace caffe
+
