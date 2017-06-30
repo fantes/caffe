@@ -714,8 +714,6 @@ void BarrelPincussionDistortion(const cv::Mat& in_img, cv::Mat* out_img,
   // from center of distortion
   cv::Mat  mapx( in_img.rows, in_img.cols, CV_32FC1);
   cv::Mat  mapy( in_img.rows, in_img.cols, CV_32FC1);
-  // int w= in_img.cols;
-  //int h= in_img.rows;
   
   float Cx = Cxf*in_img.cols;
   float Cy = Cyf*in_img.rows;
