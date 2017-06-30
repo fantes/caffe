@@ -811,3 +811,4 @@ cv::Mat ApplyDistort(const cv::Mat& in_img, const DistortionParameter& param) {
 #endif  // USE_OPENCV
 
 }  // namespace caffe
+

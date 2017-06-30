@@ -94,3 +94,4 @@ cv::Mat ApplyDistort(const cv::Mat& in_img, const DistortionParameter& param);
 }  // namespace caffe
 
 #endif  // IM_TRANSFORMS_HPP
+
