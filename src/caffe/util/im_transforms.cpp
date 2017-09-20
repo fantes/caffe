@@ -719,42 +719,50 @@ void RandomOrderChannels(const cv::Mat& in_img, cv::Mat* out_img,
   }
 }
 
-void BarrelPincussionDistortion(const cv::Mat& in_img, cv::Mat* out_img,
-                                double Cxf, double Cyf, double kx, double ky) {
+void BarrelPincussionDistortion(const cv::Mat& in_img, cv::Mat* out_img,const bool barrel,
+                                const double Cxf, const double Cyf, const double kx, const double ky) {
   // Cx, Cy: coordinates of center of transformation (in proportion to
   // image size: 0.5, 0.5 means center
   // kx, ky : parameter for deformation along both axes
   //  < 0 means barrel : enlargissement of pixels is greater near center
   //  > 0 means pincushion : enlargissement of pixels is greater far
   // from center of distortion
-  cv::Mat  mapx( in_img.rows, in_img.cols, CV_32FC1);
-  cv::Mat  mapy( in_img.rows, in_img.cols, CV_32FC1);
+	if (barrel) {
+		cv::Mat  mapx( in_img.rows, in_img.cols, CV_32FC1);
+		cv::Mat  mapy( in_img.rows, in_img.cols, CV_32FC1);
   
-  float Cx = Cxf*in_img.cols;
-  float Cy = Cyf*in_img.rows;
+		float Cx = Cxf*in_img.cols;
+		float Cy = Cyf*in_img.rows;
   
 
-  float* pbuf = (float*)mapx.ptr();
-  for (int y = 0; y < in_img.rows; y++)    
-    for (int x = 0; x < in_img.cols; x++)
-    {
-      float u  = Cx+(x-Cx)*(1+kx*((x-Cx)*(x-Cx)+(y-Cy)*(y-Cy)));
-      *pbuf = u;
-      ++pbuf;      
-    }
+		float* pbuf = (float*)mapx.ptr();
+		for (int y = 0; y < in_img.rows; y++)
+			for (int x = 0; x < in_img.cols; x++)
+			{
+				float u  = Cx+(x-Cx)*(1+kx*((x-Cx)*(x-Cx)+(y-Cy)*(y-Cy)));
+				*pbuf = u;
+				++pbuf;
+//				float u =  Cx+(x-Cx)*(1+kx*((x-Cx)*(x-Cx)+(y-Cy)*(y-Cy)));
+//				std::cout << "x: " << x << "  y: " << y << "   u:" << u << std::endl;
+//				mapx.at<float>(y,x) = Cx+(x-Cx)*(1+kx*((x-Cx)*(x-Cx)+(y-Cy)*(y-Cy)));
+			}
   
   
-  pbuf = (float*)mapy.ptr();
-  for (int y = 0;y < in_img.rows; y++)  
-    for (int x = 0; x < in_img.cols; x++) 
-    {
-      float u  = Cy+(y-Cy)*(1+ky*((x-Cx)*(x-Cx)+(y-Cy)*(y-Cy)));
-      *pbuf = u;
-      ++pbuf;
-    }
-  out_img = new cv::Mat(in_img.rows, in_img.cols, in_img.type());
-  cv::remap(in_img, *out_img, mapx, mapy, CV_INTER_CUBIC); 
+		pbuf = (float*)mapy.ptr();
+		for (int y = 0;y < in_img.rows; y++)
+			for (int x = 0; x < in_img.cols; x++)
+			{
+				float u  = Cy+(y-Cy)*(1+ky*((x-Cx)*(x-Cx)+(y-Cy)*(y-Cy)));
+				*pbuf = u;
+				++pbuf;
 
+//				std::cout << "x: " << x << "  y: " << y << "   u:" << u << std::endl;
+//				mapy.at<float>(y,x) = Cy+(y-Cy)*(1+ky*((x-Cx)*(x-Cx)+(y-Cy)*(y-Cy)));
+			}
+		cv::remap(in_img, *out_img, mapx, mapy, CV_INTER_CUBIC);
+	} else {
+		*out_img = in_img;
+	}
 }
   
 
@@ -769,8 +777,10 @@ cv::Mat ApplyDistort(const cv::Mat& in_img, const DistortionParameter& param) {
   bool saturation = param.saturation();
   bool hue = param.hue();
   bool random_order = param.random_order();
+  bool barrel = param.barrel();
+
   if (param.all_effects())
-    brightness = contrast = saturation = hue = random_order = true;
+    brightness = contrast = saturation = hue = random_order = barrel = true;
 
   vector<float> binary_probs;
   if (param.prob() > 0.0)
@@ -780,6 +790,7 @@ cv::Mat ApplyDistort(const cv::Mat& in_img, const DistortionParameter& param) {
   saturation = param.prob() ? roll_weighted_die(binary_probs) == 1 : saturation;
   hue = param.prob() ? roll_weighted_die(binary_probs) == 1 : hue;
   random_order = param.prob() ? roll_weighted_die(binary_probs) == 1 : random_order;
+  barrel = param.prob() ? roll_weighted_die(binary_probs) == 1 : barrel;
   
   if (prob > 0.5) {
     // Do random brightness distortion
@@ -799,6 +810,11 @@ cv::Mat ApplyDistort(const cv::Mat& in_img, const DistortionParameter& param) {
 
     // Do random reordering of the channels.
     RandomOrderChannels(out_img, &out_img, random_order);
+
+    // Do barrel/pincussion distortion
+    BarrelPincussionDistortion(out_img, &out_img, barrel,
+                                    param.barrel_cx(), param.barrel_cy(),
+									param.barrel_kx(), param.barrel_ky());
   } else {
     // Do random brightness distortion.
     RandomBrightness(out_img, &out_img, brightness,
@@ -817,6 +833,11 @@ cv::Mat ApplyDistort(const cv::Mat& in_img, const DistortionParameter& param) {
 
     // Do random reordering of the channels.
     RandomOrderChannels(out_img, &out_img, random_order);
+
+    // Do barrel/pincussion distortion
+     BarrelPincussionDistortion(out_img, &out_img, barrel,
+                                     param.barrel_cx(), param.barrel_cy(),
+									 param.barrel_kx(), param.barrel_ky());
   }
 
   return out_img;

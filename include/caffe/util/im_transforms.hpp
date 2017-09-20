@@ -82,8 +82,8 @@ void AdjustHue(const cv::Mat& in_img, const float delta, cv::Mat* out_img);
 void RandomOrderChannels(const cv::Mat& in_img, cv::Mat* out_img,
                          const bool random_order);
 
-void BarrelPincussionDistortion(const cv::Mat& in_img, cv::Mat* out_img,
-                                  double Cx,   double Cy, double kx, double ky);
+void BarrelPincussionDistortion(const cv::Mat& in_img, cv::Mat* out_img, const bool barrel,
+                                  const double Cx,   const double Cy, const double kx, const double ky);
 
   
   

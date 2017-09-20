@@ -558,7 +558,7 @@ message LayerParameter {
 // to the data layer's data
 message TransformationParameter {
   // For data pre-processing, we can do simple scaling and subtracting the
-  // data mean, if provided. Note that the mean subtraction is always carried
+ // data mean, if provided. Note that the mean subtraction is always carried
   // out before scaling.
   optional float scale = 1 [default = 1];
   // Specify if we want to randomly mirror data.
@@ -717,8 +717,20 @@ message DistortionParameter {
   // Randomly order the image channels.
   optional bool random_order = 12 [default = false];
 
+  // Barrel / pincussion
+  optional bool barrel = 13 [default = false];
+  // center of deformation, in relative coordinates. (0.5,0.5) is center of img
+  optional float barrel_cx = 14 [default = 0.5];
+  optional float barrel_cy = 15 [default = 0.5];
+  // distortion factors along axes 
+  //  < 0 means barrel : enlargissement of pixels is greater near center
+  //  > 0 means pincushion : enlargissement of pixels is greater far
+  // from center of distortion in [-10;10]
+  optional float barrel_kx = 16 [default = 0.0];
+  optional float barrel_ky = 17 [default = 0.0];
+
   // Whether to use all effects
-  optional bool all_effects = 13 [default = false];
+  optional bool all_effects = 18 [default = false];
 }
 
 // Message that stores parameters used by data transformer for expansion policy
