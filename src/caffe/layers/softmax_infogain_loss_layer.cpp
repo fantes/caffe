@@ -195,8 +195,6 @@ namespace caffe {
 	for (int j = 0; j < inner_num_; ++j) {
         const int label_value =
           static_cast<int>(bottom_label[i * inner_num_ + j]);
-        DCHECK_GE(label_value, 0);
-        DCHECK_LT(label_value, num_labels_);
         if (has_ignore_label_ && label_value == ignore_label_) {
           for (int l = 0; l < num_labels_; ++l) {
             bottom_diff[i * dim + l * inner_num_ + j] = 0;
