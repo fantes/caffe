@@ -74,8 +74,8 @@ void MultiLabelSigmoidLossLayer<Dtype>::Forward_cpu(
   Dtype loss = 0;
   int valid_count = 0;
   for (int i = 0; i < count; ++i) {
-    if (target[i] >= 0) {
-    // Update the loss only if target[i] is not -1
+    if (target[i] >=0 && target[i] <=1) {
+    // Update the loss only if target[i] is within [0,1]
       loss -= input_data[i] * (target[i] - (input_data[i] >= 0)) -
         log(1 + exp(input_data[i] - 2 * input_data[i] * (input_data[i] >= 0)));
       ++valid_count;
@@ -108,12 +108,15 @@ void MultiLabelSigmoidLossLayer<Dtype>::Backward_cpu(
     Dtype* bottom_diff = bottom[0]->mutable_cpu_diff();
     int valid_count = 0;
     for (int i = 0; i < count; ++i) {
-      if (target[i] >= 0) {
-        bottom_diff[i] = sigmoid_output_data[i] - target[i];
-        valid_count++;
-      } else {
-        bottom_diff[i] = 0;
-      }
+      if (target[i]<0 || target[i] > 1)
+        {
+          bottom_diff[i] = 0;
+        }
+      else
+        {
+          bottom_diff[i] = sigmoid_output_data[i] - target[i];
+          valid_count++;
+        }
     }
     // Scale down gradient
     const Dtype loss_weight = top[0]->cpu_diff()[0];

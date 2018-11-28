@@ -9,30 +9,35 @@ namespace caffe {
 template <typename Dtype>
 __global__ void MultiLabelSigmoidLossForwardGPU(const int nthreads,
           const Dtype* input_data, const Dtype* target, Dtype* loss,
-          Dtype* counts) {
+                                                Dtype* counts) {
   CUDA_KERNEL_LOOP(i, nthreads) {
     //    const Dtype target_value = static_cast<Dtype>(target[i]);
-    if (target[i] >= 0) {
-      loss[i] = input_data[i] * (target[i] - (input_data[i] >= 0)) -
-        log(1 + exp(input_data[i] - 2 * input_data[i] *
-                    (input_data[i] >= 0)));
-      counts[i] = 1;
-    } else {
-      counts[i] = 0;
-      loss[i] = 0;
+    if (target[i] < 0 || target[i] > 1)
+      {
+        counts[i] = 0;
+        loss[i] = 0;
+      }
+    else
+      {
+        loss[i] = input_data[i] * (target[i] - (input_data[i] >= 0)) -
+          log(1 + exp(input_data[i] - 2 * input_data[i] *
+                      (input_data[i] >= 0)));
+        counts[i] = 1;
+      }
     }
-  }
-}
+ }
+
 
  template <typename Dtype>
    __global__ void MultiLabelSigmoidLossIgnoreDiffGPU(const int count,
                                                       const Dtype* target, Dtype* diff, Dtype* counts) {
    CUDA_KERNEL_LOOP(i, count) {
      //const Dtype target_value = static_cast<Dtype>(target[i]);
-     if (target[i] < 0) {
-       diff[i] = 0;
-       counts[i] = 0;
-     } else
+     if (target[i] < 0 || target[i] > 1)
+       {
+         diff[i] = 0;
+         counts[i] = 0;
+       } else
        counts[i] = 1;
    }
  }
@@ -61,7 +66,7 @@ void MultiLabelSigmoidLossLayer<Dtype>::Forward_gpu(
   // NOLINT_NEXT_LINE(whitespace/operators)
   MultiLabelSigmoidLossForwardGPU<Dtype><<<CAFFE_GET_BLOCKS(count),
       CAFFE_CUDA_NUM_THREADS>>>(count, input_data, target, loss_data,
-      count_data);
+                                count_data);
   caffe_gpu_asum(count, count_data, &valid_count);
   Dtype loss;
   caffe_gpu_asum(count, loss_data, &loss);
