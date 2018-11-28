@@ -21,8 +21,7 @@ class MultiLabelSigmoidLossLayer : public LossLayer<Dtype> {
   explicit MultiLabelSigmoidLossLayer(const LayerParameter& param)
       : LossLayer<Dtype>(param), diff_(),
           sigmoid_layer_(new SigmoidLayer<Dtype>(param)),
-          sigmoid_output_(new Blob<Dtype>()) {
-  }
+          sigmoid_output_(new Blob<Dtype>()) {}
   virtual void LayerSetUp(const vector<Blob<Dtype>*>& bottom,
       const vector<Blob<Dtype>*>& top);
   /*virtual void Reshape(const vector<Blob<Dtype>*>& bottom,
@@ -61,7 +60,6 @@ class MultiLabelSigmoidLossLayer : public LossLayer<Dtype> {
   vector<Blob<Dtype>*> sigmoid_bottom_vec_;
   /// top vector holder to call the underlying SigmoidLayer::Forward
   vector<Blob<Dtype>*> sigmoid_top_vec_;
-
 
 };
 
