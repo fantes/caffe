@@ -108,14 +108,14 @@ void MultiLabelSigmoidLossLayer<Dtype>::Backward_cpu(
     Dtype* bottom_diff = bottom[0]->mutable_cpu_diff();
     int valid_count = 0;
     for (int i = 0; i < count; ++i) {
-      if (target[i]<0 || target[i] > 1)
-        {
-          bottom_diff[i] = 0;
-        }
-      else
+      if (target[i]>=0 && target[i] <= 1)
         {
           bottom_diff[i] = sigmoid_output_data[i] - target[i];
           valid_count++;
+        }
+      else
+        {
+          bottom_diff[i] = 0;
         }
     }
     // Scale down gradient
