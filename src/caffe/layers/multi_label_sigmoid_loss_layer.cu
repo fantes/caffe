@@ -19,7 +19,7 @@ __global__ void MultiLabelSigmoidLossForwardGPU(const int nthreads,
                       (input_data[i] >= 0)));
         counts[i] = 1;
       }
-    elsge
+    else
       {
         counts[i] = 0;
         loss[i] = 0;
