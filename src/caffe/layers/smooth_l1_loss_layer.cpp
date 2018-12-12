@@ -10,6 +10,7 @@ void SmoothL1LossLayer<Dtype>::LayerSetUp(
   LossLayer<Dtype>::LayerSetUp(bottom, top);
   SmoothL1LossParameter loss_param = this->layer_param_.smooth_l1_loss_param();
   sigma2_ = loss_param.sigma() * loss_param.sigma();
+  norm_loss_by_count_ = (loss_param.norm_mode() == SmoothL1LossParameter::COUNT);
   has_weights_ = (bottom.size() >= 3);
   if (has_weights_) {
     CHECK_EQ(bottom.size(), 4) << "If weights are used, must specify both "
@@ -73,8 +74,13 @@ void SmoothL1LossLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& bottom,
       error_data[i] = abs_val - 0.5 / sigma2_;
     }
   }
-  top[0]->mutable_cpu_data()[0] =
-    caffe_cpu_asum(count, errors_.cpu_data()) / bottom[0]->num();
+  if (norm_loss_by_count_)
+    top[0]->mutable_cpu_data()[0] =
+      caffe_cpu_asum(count, errors_.cpu_data()) / bottom[0]->count();
+  else
+    top[0]->mutable_cpu_data()[0] =
+      caffe_cpu_asum(count, errors_.cpu_data()) / bottom[0]->num();
+
 }
 
 template <typename Dtype>
