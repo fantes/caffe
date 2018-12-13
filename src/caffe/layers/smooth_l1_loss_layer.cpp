@@ -10,7 +10,7 @@ void SmoothL1LossLayer<Dtype>::LayerSetUp(
   LossLayer<Dtype>::LayerSetUp(bottom, top);
   SmoothL1LossParameter loss_param = this->layer_param_.smooth_l1_loss_param();
   sigma2_ = loss_param.sigma() * loss_param.sigma();
-  norm_loss_by_count_ = (loss_param.norm_mode() == SmoothL1LossParameter::COUNT);
+  norm_loss_by_count_ = (this->layer_param_.loss_param().normalization() == LossParameter::FULL);
   has_weights_ = (bottom.size() >= 3);
   if (has_weights_) {
     CHECK_EQ(bottom.size(), 4) << "If weights are used, must specify both "

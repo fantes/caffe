@@ -1834,15 +1834,6 @@ message SmoothL1LossParameter {
   //   0.5 * (sigma * x) ** 2    -- if x < 1.0 / sigma / sigma
   //   |x| - 0.5 / sigma / sigma -- otherwise
   optional float sigma = 1 [default = 1];
-  // if normmode = count, divide printed loss by total number of atomic element and not only
-  // by batch size
-  // giving an average error per float value and not the average over the sum over the vector
-  enum NormMode {
-    DEFAULT = 0;
-    COUNT = 1;
-  }
-  optional NormMode norm_mode = 2 [default = DEFAULT]; 
-  // for timeseries case, we use this loss as default
   //default is set to 100, giving almost L1 loss (until |diff|<100*100)
 }
 
