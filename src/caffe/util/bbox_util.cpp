@@ -1778,7 +1778,7 @@ void OSGetConfidenceScores(const Dtype* conf_data,
     map<int, vector<float> >& label_scores = (*conf_preds)[i];
     for (int p = 0; p < num_preds_per_class; ++p) {
       int start_idx = p * num_classes;
-      if (arm_conf_data[startidx + p * 2 + 1] < objectness_score) {
+      if (arm_conf_data[start_idx + p * 2 + 1] < objectness_score) {
         for (int c = 0; c < num_classes; ++c) {
           if (c == 0) {
         	label_scores[c].push_back(1.0);
