@@ -57,11 +57,11 @@ void DetectionOutputLayer<Dtype>::Forward_gpu(
 
   if ((output_logits_ && bottom.size() >= 5) || (!output_logits_ && bottom.size() >= 4)) {
     OSPermuteDataGPU<Dtype>(bottom[1]->count(), bottom[1]->gpu_data(), bottom[3]->gpu_data(),
-                            num_classes_, num_priors_, 1, conf_permute_data, objectness_score_);
+                            num_classes_, num_priors_, num, conf_permute_data, objectness_score_);
   }
   else {
     PermuteDataGPU<Dtype>(bottom[1]->count(), bottom[1]->gpu_data(),
-       num_classes_, num_priors_, 1, conf_permute_data);
+       num_classes_, num_priors_, num, conf_permute_data);
   }
   const Dtype* conf_cpu_data = conf_permute_.cpu_data();
 
